@@ -13,19 +13,19 @@ export const socketState = reactive({
 export const socketFunctionality = {
   connect: () => {
     socket.connect();
-    console.log('connected')
+    if (!sessionStorage.getItem("playerName")) {
+      sessionStorage.setItem("playerName", (Math.random()*200).toString());
+    }
+    socket.emit("getSnake", sessionStorage.getItem("playerName"));
   },
   disconnect: () => {
     socket.disconnect();
-    console.log('disconnected')
   },
   start: () => {
     socket.emit("start", );
-    console.log('start')
   },
   end: () => {
     socket.emit("end", );
-    console.log('end')
   }
 
 }

@@ -30,9 +30,15 @@ io.on("connection", (socket) => {
   // welcomes a new player to a new room
   socket.join(rooms['multi']); // only joins player to the multiplayer room so far
   console.log('someone has joined')
+  let playerName = "";
 
-  let snake = game.addSnake(socket.id)
-  console.log(snake.getPosition());
+  let snake;
+  
+  socket.on("getSnake", (name) => {
+    snake = game.getSnake(name)
+    console.log(snake.getPosition());
+    playerName = name;
+  })
 
 
 
@@ -51,7 +57,7 @@ io.on("connection", (socket) => {
     console.log("game ended ===========")
     gameEnd();
     game = new Game();
-    snake = game.addSnake(socket.id)
+    snake = game.getSnake(playerName)
   })
 
 

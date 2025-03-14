@@ -122,6 +122,7 @@ class Snake {
 
 export class Game {
     private board: Array<Array<number>>;
+    private snakeRegistry: Map<string, Snake>;
     private snakes: Array<Snake>;
     private boardSize = 20;
     private numApples = 4;
@@ -132,6 +133,7 @@ export class Game {
         for (let i = 0; i < this.boardSize; i++) {
             this.board[i] = new Array(this.boardSize).fill('0');
         }
+        this.snakeRegistry = new Map();
         this.snakes = new Array();
         this.apples = new Array();
 
@@ -182,7 +184,20 @@ export class Game {
         this.spawnApple();
     }
 
+    // connecting a user to a snake; if snake doesn't exist, create one
+    public getSnake(name: string): Snake {
+        console.log("GETTING SNAKE...", name)
+
+        if (this.snakeRegistry.has(name)) {
+            return this.snakeRegistry.get(name)!;
+        }
+
+        return this.addSnake(name);
+
+    }
+
     public addSnake(name:string):Snake {
+        console.log("NEW SNAKE!!")
         let position = new Array<Coord>(3);
         let head : Coord = {x: 7, y:5};
         let direction = Dir.right;
@@ -193,6 +208,7 @@ export class Game {
         })
 
         this.snakes.push(s);
+        this.snakeRegistry.set(name, s);
         return s;
     }
 
@@ -214,7 +230,6 @@ export class Game {
             case boardItems.empty:
                 return 0;
             case boardItems.apple: // apple ate, apple respawn!
-                console.log("APPLE EATN")
                 this.eatApple(nh);
                 return 1;
             case boardItems.team1: // (same team, for now)
