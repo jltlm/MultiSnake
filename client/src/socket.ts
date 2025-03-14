@@ -1,14 +1,12 @@
 import { io } from "socket.io-client";
 import { reactive } from "vue";
+import { gameFunctionality, gameState } from "./game";
 
 export const socketState = reactive({
     connected : false,
-    board : [],
-    info : [],
-    direction: "right"
 })
 
-const socket = io("http://127.0.0.1:8000/", {
+  const socket = io("http://127.0.0.1:8000/", {
     autoConnect: false
 });
 
@@ -32,29 +30,27 @@ export const socketFunctionality = {
 
 }
 
+// receiving from socket
 socket.on("connect", () => {
   socketState.connected = true;
   console.log('connected!');
+  gameFunctionality.initializeBoard();
 });
 
 socket.on("disconnect", () => {
   socketState.connected = false;
 });
 
-socket.on("game", (info, board) => {
-  socketState.info = info;
-  socketState.board = board;
-  console.log('getting game info')
+socket.on("game", (info, gameobjects) => {
+  gameState.info = info;
+  gameState.snakes = gameobjects.snakes;
+  gameState.apples = gameobjects.apples;
+  console.log("apples", gameState.apples, gameobjects.apples);
 
-  socket.emit("direction", socketState.direction); // sending direction
+
+  console.log('getting game info')
+  gameFunctionality.updateWithGameObjects()
+
+  socket.emit("direction", gameState.direction); // sending direction
 
 });
-
-
-// socket.on("foo", (...args) => {
-//   state.fooEvents.push(args);
-// });
-
-// socket.on("bar", (...args) => {
-//   state.barEvents.push(args);
-// });

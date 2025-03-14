@@ -4,15 +4,16 @@ const enum Dir {
     left = 'left',
     right = 'right'
 }
-interface Coord {
+type Coord = {
     x:number;
     y:number;
 }
-const dirCoords = {
-    'up': {x: 0, y: -1},
-    'down': {x: 0, y: 1},
-    'left': {x: -1, y: 0},
-    'right': {x: 1, y: 0},
+
+const dirCoords = { // these are weird because grids are weird (y then x)
+    'up': {x: -1, y: 0},
+    'down': {x: 1, y: 0},
+    'left': {x: 0, y: -1},
+    'right': {x: 0, y: 1},
 }
 
 enum boardItems {
@@ -26,35 +27,14 @@ enum TeamID {
     red = 1, blue = 2
 }
 
-// holds the snake body's position in the board
-class SnakePosition {
-    private head: Coord; // body is a queue, so head is body[last]
-    private body : Array<Coord>;
-    private direction: Dir;
-
-    public constructor(head:Coord, direction: Dir) {
-        this.head = head;
-        this.direction = direction;
-        switch (direction) {
-            case Dir.up:
-                break;
-
-        }
-    }
-
-    public getHead() :Coord {
-        return this.head;
-    }
-    
-}
-
-class SimpleSnake {
+class Snake {
 
     private score: number;
     private direction: Dir;
 
     private position: Array<Coord>; // queue
     private head: Coord;
+    private trail: Coord;
     private starterLen = 5;
     private color = 1;
 
@@ -65,9 +45,10 @@ class SimpleSnake {
         this.position = new Array();
         let snakeLen = this.starterLen;
         for (let i = snakeLen-1; i >= 0; i--) {
-            this.position.unshift({x: head.x-i*dirCoords[direction].x, y: head.y-i*dirCoords[direction].y});
+            // this.position.unshift({x: head.x-i*dirCoords[direction].x, y: head.y-i*dirCoords[direction].y});
+            this.position.push({x: head.x, y: head.y});
         }
-
+        this.trail = head;
     }
 
     public getColor(): number {
@@ -112,6 +93,7 @@ class SimpleSnake {
         this.score += scoreIncrease;
         if (this.score + this.starterLen < this.position.length) {
             out = this.position.pop();
+            this.trail = out ? out : this.trail;
         }
         this.head = newHead;
         return out;
@@ -126,21 +108,32 @@ class SimpleSnake {
             console.log(`(${e.x}, ${e.y})`)
         });
     }
+
+    public serializeSnake(): {} {
+        let sdict = {
+            id: this.color,
+            head: this.head,
+            trail: this.trail
+        };
+        return sdict;
+    }
     
 }
 
-export class SimpleGame {
+export class Game {
     private board: Array<Array<number>>;
-    private snakes: Array<SimpleSnake>;
+    private snakes: Array<Snake>;
     private boardSize = 20;
     private numApples = 4;
+    private apples: Array<Coord>;
 
     public constructor() {
         this.board = new Array(this.boardSize);
         for (let i = 0; i < this.boardSize; i++) {
             this.board[i] = new Array(this.boardSize).fill('0');
         }
-        this.snakes = Array();
+        this.snakes = new Array();
+        this.apples = new Array();
 
         for (let i = 0; i < this.numApples; i++) {
             this.spawnApple();
@@ -148,12 +141,23 @@ export class SimpleGame {
 
     }
 
+    public getBoardItems() {
+        let sarr = Array();
+        for (let i = 0; i < this.snakes.length; i++) {
+            let entry = this.snakes[i].serializeSnake();
+            sarr.push(entry);
+        }
+        return {
+            snakes: sarr,
+            apples: this.apples
+        }
+    }
+
     public getBoard() {
         return this.board;
     }
 
-    // spawns an apple in a random unoccupied space
-    public spawnApple() {
+    public getRandUnoccupiedSpace() : Coord {
         let randX = Math.floor(Math.random() * this.boardSize);
         let randY = Math.floor(Math.random() * this.boardSize);
 
@@ -161,14 +165,28 @@ export class SimpleGame {
             randX = Math.floor(Math.random() * this.boardSize);
             randY = Math.floor(Math.random() * this.boardSize);
         }        
-        this.board[randX][randY] = boardItems.apple;
+        return {x: randX, y: randY};
     }
 
-    public addSnake(name:string):SimpleSnake {
+    // spawns an apple in a random unoccupied space, returns coord of apple
+    public spawnApple() : Coord {
+        let randCoord = this.getRandUnoccupiedSpace();
+        this.apples.push(randCoord)
+        this.board[randCoord.x][randCoord.y] = boardItems.apple;
+        return randCoord;
+    }
+
+    // will spawn a new apple to replace the last one
+    public eatApple(coord: Coord) {
+        this.apples = this.apples.filter(e => !(coord.x==e.x&&coord.y==e.y));
+        this.spawnApple();
+    }
+
+    public addSnake(name:string):Snake {
         let position = new Array<Coord>(3);
         let head : Coord = {x: 7, y:5};
         let direction = Dir.right;
-        let s = new SimpleSnake(head, direction);
+        let s = new Snake(head, direction);
 
         position.forEach(e => {
             this.board[e.x][e.y] = TeamID.red;
@@ -185,7 +203,7 @@ export class SimpleGame {
     // checks if the head of the snake will hit any bodies on the board
     // or if head will hit a wall (out of bounds)
     // returns score increase or -1 if bad collision (snake death)
-    private handleCollisions(s:SimpleSnake, nh: Coord): number {
+    private handleCollisions(s:Snake, nh: Coord): number {
         // check oob
         if (nh.x < 0 || nh.x >= this.boardSize || nh.y < 0 || nh.y >= this.boardSize) {
             return -1;
@@ -195,8 +213,9 @@ export class SimpleGame {
         switch (this.board[nh.x][nh.y]) {
             case boardItems.empty:
                 return 0;
-            case boardItems.apple: // apple respawn!
-                this.spawnApple();
+            case boardItems.apple: // apple ate, apple respawn!
+                console.log("APPLE EATN")
+                this.eatApple(nh);
                 return 1;
             case boardItems.team1: // (same team, for now)
                 return 0;
@@ -230,51 +249,7 @@ export class SimpleGame {
 
 }
 
-export class Game {
-    private board: Array<Array<number>>;
-    private snakes: Array<Snake>;
-    private teamRed: Team;
-    private teamBlue: Team;
 
-    public constructor() {
-        this.board = Array(400).fill(Array(400).fill(0));
-        this.snakes = Array();
-        this.teamRed = new Team();
-        this.teamBlue = new Team();
-    }
-
-    public getBoard() {
-        return this.board;
-    }
-
-    public addSnake(name:string):Snake {
-        let teamid = this.teamRed.getTeamSize() > this.teamBlue.getTeamSize() ? TeamID.red : TeamID.blue;
-        let position = new Array<Coord>(3);
-        let head : Coord = {x: 3, y:5};
-        let direction = Dir.down;
-        let s = new Snake(name, teamid, position, head, direction);
-
-        position.forEach(e => {
-            this.board[e.x][e.y] = teamid;
-        })
-
-        this.snakes.push(s);
-        return s;
-    }
-
-    private determineSpawn(team: TeamID) {
-
-    }
-
-    public updateBoard() {
-
-    }
-
-
-
-
-
-}
 
 class Team {
     private snakes: Array<Snake>;
@@ -303,44 +278,4 @@ class Team {
         return this.snakes.length;
     }
 
-}
-
-class Snake {
-
-    private name: string;
-    private score: number;
-    private team: TeamID;
-    private direction: Dir;
-
-    private position: Array<Coord>; // stack
-    private head: Coord;
-
-    public constructor(name: string, team: TeamID, position:Array<Coord>, head: Coord, direction:Dir) {
-        this.name = name;
-        this.score = 0;
-        this.team = team;
-        this.position = position;
-        this.head = head;
-        this.direction = direction;
-
-    }
-
-    public getName():string {
-        return this.name;
-    }
-
-    public getScore():number {
-        return this.score;
-    }
-
-    public setScore(score: number) {
-        this.score = score;
-    }
-
-    public getDirection():Dir {
-        return this.direction;
-    }
-
-
-    
 }

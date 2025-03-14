@@ -1,7 +1,7 @@
 // Load HTTP module
 import { createServer } from "http";
 import { Server } from "socket.io";
-import { Game, SimpleGame } from "./GameObjects";
+import { Game } from "./GameObjects";
 
 const hostname = "127.0.0.1";
 const port = 8000;
@@ -14,7 +14,7 @@ httpServer.listen(port, hostname, function () {
 
 const io = new Server(httpServer, {
   cors: {
-    origin: "http://localhost:5173"
+    origin: "http://127.0.0.1:5173"
   }
   // options
 });
@@ -24,7 +24,7 @@ let rooms = {
   'single': 'singleplayer'
 }
 
-let game = new SimpleGame();
+let game = new Game();
 
 io.on("connection", (socket) => {
   // welcomes a new player to a new room
@@ -36,15 +36,9 @@ io.on("connection", (socket) => {
 
 
 
-  let gameActiveInterval: NodeJS.Timeout;
   socket.on("start", (s) => {
     console.log("game started ===========")
-    
-    gameActiveInterval = setInterval(function() {
-      io.to(rooms['multi']).emit('game', 'd', game.getBoard());
-      game.updateBoard();
-      console.log("updating game");
-    }, 1000);
+    gameStart();
     
   })
 
@@ -55,12 +49,26 @@ io.on("connection", (socket) => {
 
   socket.on("end", (s) => {
     console.log("game ended ===========")
-    clearInterval(gameActiveInterval);
-    game = new SimpleGame();
+    gameEnd();
+    game = new Game();
     snake = game.addSnake(socket.id)
   })
 
 
 });
+
+let gameActiveInterval: NodeJS.Timeout;
+function gameStart() {
+  gameActiveInterval = setInterval(function() {
+    io.to(rooms['multi']).emit('game', 'gameinfo', game.getBoardItems());
+    game.updateBoard();
+    console.log("updating game");
+  }, 500);
+
+}
+
+function gameEnd() {
+  clearInterval(gameActiveInterval);
+}
 
 

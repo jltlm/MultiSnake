@@ -1,26 +1,25 @@
 <script setup lang="ts">
 import Board from './components/Board.vue';
+import { gameState } from './game';
 import { socketFunctionality, socketState } from './socket';
-
-// socket.connect();
 
 addEventListener("keydown", (e) => {
   switch (e.key) {
     case 'ArrowUp':
       console.log('up');
-      socketState.direction = "up"
+      gameState.direction = "up"
       break;
     case 'ArrowDown':
       console.log('down');
-      socketState.direction = "down";
+      gameState.direction = "down";
       break;
     case 'ArrowLeft':
       console.log('left');
-      socketState.direction = "left";
+      gameState.direction = "left";
       break;
     case 'ArrowRight':
       console.log('right');
-      socketState.direction = "right";
+      gameState.direction = "right";
       break;
   }
 });

@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { socketState } from '../socket';
+import { gameState } from '../game';
+
 
 function determineSpaceType(cell:number) {
     switch (cell) {
@@ -22,12 +23,12 @@ function determineSpaceType(cell:number) {
 
 <template>
     <div class="grid-container">
-    <div v-for="(cell, index) in socketState.board.flat()" 
+    <div v-for="(cell, index) in gameState.board.flat()" 
         :key="index" 
         :class="['space', determineSpaceType(cell)]">
     </div>
     </div>
-    <h1>Direction: {{ socketState.direction }}</h1>
+    <h1>Direction: {{ gameState.direction }}</h1>
 </template>
 
 <style scoped>
