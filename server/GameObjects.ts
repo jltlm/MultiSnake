@@ -4,10 +4,8 @@ const enum Dir {
     left = 'left',
     right = 'right'
 }
-type Coord = {
-    x:number;
-    y:number;
-}
+
+type Coord = { x:number; y:number; }
 
 const dirCoords = { // these are weird because grids are weird (y then x)
     'up': {x: -1, y: 0},
@@ -17,10 +15,8 @@ const dirCoords = { // these are weird because grids are weird (y then x)
 }
 
 enum boardItems {
-    empty = 0,
-    team1 = 1,
-    team2 = 2,
-    apple = 3
+    empty = 0, apple = 1,
+    team1 = 2, team2 = 3,
 }
 
 enum TeamID {
@@ -28,56 +24,36 @@ enum TeamID {
 }
 
 class Snake {
-
     private score: number;
     private direction: Dir;
-
     private position: Array<Coord>; // queue
     private head: Coord;
     private trail: Coord;
     private starterLen = 5;
-    private color = 1;
+    private id = 1;
+    private team = 2;
 
-    public constructor(head: Coord, direction: Dir) {
+    public constructor(head: Coord, direction: Dir, team: TeamID) {
         this.score = 0;
         this.head = head;
         this.direction = direction;
         this.position = new Array();
         let snakeLen = this.starterLen;
         for (let i = snakeLen-1; i >= 0; i--) {
-            // this.position.unshift({x: head.x-i*dirCoords[direction].x, y: head.y-i*dirCoords[direction].y});
             this.position.push({x: head.x, y: head.y});
         }
         this.trail = head;
+        this.team = team;
     }
 
-    public getColor(): number {
-        return this.color;
-    }
-
-    public getScore():number {
-        return this.score;
-    }
-
-    public getPosition() {
-        return this.position;
-    }
-
-    public getHead() : Coord {
-        return this.head;
-    }
-
-    public getDirection():Dir {
-        return this.direction;
-    }
-
-    public printDirection() {
-        console.log(this.direction);
-    }
-
-    public setDirection(d: Dir) {
-        this.direction = d;
-    }
+    public getTeam(): TeamID { return this.team; }
+    public getID(): number { return this.id; }
+    public setID(id: number) { this.id = id; }
+    public getScore():number { return this.score; }
+    public getPosition() { return this.position; }
+    public getHead() : Coord { return this.head; }
+    public getDirection():Dir { return this.direction; }
+    public setDirection(d: Dir) { this.direction = d; }
 
     public newHead(): Coord {
         let newHead = {
@@ -111,7 +87,7 @@ class Snake {
 
     public serializeSnake(): {} {
         let sdict = {
-            id: this.color,
+            id: this.id,
             head: this.head,
             trail: this.trail
         };
@@ -127,6 +103,8 @@ export class Game {
     private boardSize = 20;
     private numApples = 4;
     private apples: Array<Coord>;
+    private redTeam: Team;
+    private blueTeam: Team;
 
     public constructor() {
         this.board = new Array(this.boardSize);
@@ -141,9 +119,11 @@ export class Game {
             this.spawnApple();
         }
 
+        this.redTeam = new Team("red", TeamID.red);
+        this.blueTeam = new Team("blue", TeamID.blue);
     }
 
-    public getBoardItems() {
+    public getBoardItems() { // for serializing stuff to send
         let sarr = Array();
         for (let i = 0; i < this.snakes.length; i++) {
             let entry = this.snakes[i].serializeSnake();
@@ -153,10 +133,6 @@ export class Game {
             snakes: sarr,
             apples: this.apples
         }
-    }
-
-    public getBoard() {
-        return this.board;
     }
 
     public getRandUnoccupiedSpace() : Coord {
@@ -186,22 +162,19 @@ export class Game {
 
     // connecting a user to a snake; if snake doesn't exist, create one
     public getSnake(name: string): Snake {
-        console.log("GETTING SNAKE...", name)
-
         if (this.snakeRegistry.has(name)) {
             return this.snakeRegistry.get(name)!;
         }
-
         return this.addSnake(name);
-
     }
 
     public addSnake(name:string):Snake {
         console.log("NEW SNAKE!!")
         let position = new Array<Coord>(3);
-        let head : Coord = {x: 7, y:5};
+        let head : Coord = this.getRandUnoccupiedSpace();
         let direction = Dir.right;
-        let s = new Snake(head, direction);
+        let team = this.redTeam.getSnakeCount() > this.blueTeam.getSnakeCount() ? TeamID.blue : TeamID.red;
+        let s = new Snake(head, direction, team);
 
         position.forEach(e => {
             this.board[e.x][e.y] = TeamID.red;
@@ -209,11 +182,12 @@ export class Game {
 
         this.snakes.push(s);
         this.snakeRegistry.set(name, s);
+        if (this.redTeam.getSnakeCount() > this.blueTeam.getSnakeCount()) {
+            this.blueTeam.addSnake(s);
+        } else {
+            this.redTeam.addSnake(s);
+        }
         return s;
-    }
-
-    private determineSpawn(team: TeamID) {
-
     }
 
     // checks if the head of the snake will hit any bodies on the board
@@ -252,7 +226,7 @@ export class Game {
                 s.die()
             } else {
                 let tail = s.update(nh, collisionResult);
-                this.board[nh.x][nh.y] = s.getColor();
+                this.board[nh.x][nh.y] = s.getID();
                 if (tail) {
                     this.board[tail.x][tail.y] = 0;                    
                 }
@@ -264,33 +238,40 @@ export class Game {
 
 }
 
+class FakeSnake {
+
+}
 
 
 class Team {
-    private snakes: Array<Snake>;
+    private snakes: Map<number, Snake>;
     private score: number;
+    private name: string;
+    private idcount: number;
 
-    public constructor() {
-        this.snakes = Array();
+    public constructor(name: string, firstID: number) {
+        this.snakes = new Map();
         this.score = 0;
+        this.name = name;
+        this.idcount = firstID;
     }
+
+    public getScore(): number { return this.score; }
+    public getSnakeCount() : number { return this.snakes.size; }
 
     public addSnake(s: Snake) {
-        this.snakes.push(s);
+        this.snakes.set(this.idcount, s);
+        s.setID(this.idcount)
+        this.idcount+=2;
     }
 
-    public updateScore():number {
+    public updateScore() : number {
         this.score = 0;
         this.snakes.forEach(s => {this.score += s.getScore()})
         return this.score;
     }
 
-    public getScore():number {
-        return this.score;
-    }
-
-    public getTeamSize(): number {
-        return this.snakes.length;
-    }
-
 }
+
+// can be blocked by a fellow teammate, not killed
+// can be killed by an opposing teammate

@@ -1,27 +1,21 @@
 <script setup lang="ts">
 import { gameState } from '../game';
 
-
 function determineSpaceType(cell:number) {
-    switch (cell) {
-        case 0:
-            return 'empty-space';
-        case 1:
-            return 'team1-space';
-        case 2:
-            return 'team1-space';
-        case 3:
-            return 'apple-space';
-        case 3:
-            return 'snake-space';
-        default:
-            return 'empty-space';
-    }
+    if (cell == 0) return 'empty-space';
+    if (cell == 1) return 'apple-space';
+    if (cell%2 == 0) return 'team1-space'; // 2 and evens above
+    if ((cell-1)%2 == 0) return 'team2-space'; // 3 and odds above
+
+    return 'empty-space';
 }
 
 </script>
 
 <template>
+    <div>
+        {{ gameState.snakes }}
+    </div>
     <div class="grid-container">
     <div v-for="(cell, index) in gameState.board.flat()" 
         :key="index" 
@@ -38,8 +32,8 @@ function determineSpaceType(cell:number) {
     grid-template-rows: repeat(20, 1fr);
     gap: 0px;
     border: white solid 5px;
-    width: 500px;
-    height: 500px;
+    width: 420px;
+    height: 420px;
 }
 
 div.space {
@@ -58,16 +52,18 @@ div.apple-space {
 }
 div.empty-space {
     background-color: #00000000;
-    /* border: 1px solid #99999942; */
 }
 div.snake-space {
     background-color: #4e1972;
     border: 1px solid #00ffea;
 }
-
 div.team1-space {
     background-color: #770202;
-    border: 1px solid #00ff00;
+    border: 1px solid #62ffb6;
+}
+div.team2-space {
+    background-color: #40ff70;
+    border: 1px solid #ff006a;
 }
 
 </style>

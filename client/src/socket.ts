@@ -26,6 +26,7 @@ export const socketFunctionality = {
   },
   end: () => {
     socket.emit("end", );
+    gameFunctionality.initializeBoard();
   }
 
 }
