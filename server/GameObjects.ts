@@ -199,6 +199,7 @@ export class Game {
             return -1;
         }
 
+        let spot = this.board[nh.x][nh.y];
         // checking which square the head lands on
         switch (this.board[nh.x][nh.y]) {
             case boardItems.empty:
@@ -206,9 +207,11 @@ export class Game {
             case boardItems.apple: // apple ate, apple respawn!
                 this.eatApple(nh);
                 return 1;
-            case boardItems.team1: // (same team, for now)
+            case s.getTeam(): // same team collision
                 return 0;
-            case boardItems.team2:
+            default: // other team collision
+                // get snake colliding with using spot
+                
                 // and u wanna tell the other snake to score up
                 return -1
         }
@@ -228,7 +231,7 @@ export class Game {
                 let tail = s.update(nh, collisionResult);
                 this.board[nh.x][nh.y] = s.getID();
                 if (tail) {
-                    this.board[tail.x][tail.y] = 0;                    
+                    this.board[tail.x][tail.y] = 0;
                 }
             }
 

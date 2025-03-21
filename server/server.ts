@@ -5,7 +5,11 @@ import { Game } from "./GameObjects";
 
 const hostname = "127.0.0.1";
 const port = 8000;
-const httpServer = createServer(function (req, res) {}); // Create HTTP server
+const httpServer = createServer(function (req, res) {
+  res.writeHead(200, {
+    'Access-Control-Allow-Origin': '*'
+  });
+}); // Create HTTP server
 
 // Prints a log once the server starts listening
 httpServer.listen(port, hostname, function () {
@@ -14,7 +18,9 @@ httpServer.listen(port, hostname, function () {
 
 const io = new Server(httpServer, {
   cors: {
-    origin: "http://127.0.0.1:5173"
+    // origin: "http://127.0.0.1:5173"
+    origin: "https://7d2b12uladuc.share.zrok.io",
+    methods: ["GET", "POST"]
   }
   // options
 });
