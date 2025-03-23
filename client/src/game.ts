@@ -13,7 +13,8 @@ export const gameState = reactive({
     board: new Array<Array<number>>,
     snakes: [],
     apples: [],
-    direction: "right"
+    direction: "right",
+    mySnakeID: 0
   });
 
   export const gameFunctionality = {

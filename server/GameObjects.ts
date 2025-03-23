@@ -190,6 +190,12 @@ export class Game {
         return s;
     }
 
+    // returns true if coord is oob
+    private isOob(coord: Coord) : Boolean {
+        return coord.x < 0 || coord.x >= this.boardSize
+            || coord.y < 0 || coord.y >= this.boardSize;
+    }
+
     // checks if the head of the snake will hit any bodies on the board
     // or if head will hit a wall (out of bounds)
     // returns score increase or -1 if bad collision (snake death)
@@ -209,11 +215,11 @@ export class Game {
                 return 1;
             case s.getTeam(): // same team collision
                 return 0;
-            default: // other team collision
-                // get snake colliding with using spot
+            // case s.getTeam(): // other team collision
+            //     // get snake colliding with using spot
                 
-                // and u wanna tell the other snake to score up
-                return -1
+            //     // and u wanna tell the other snake to score up
+            //     return -1
         }
 
         return 0;
@@ -226,6 +232,8 @@ export class Game {
             let collisionResult = this.handleCollisions(s, nh);
 
             if (collisionResult == -1) {
+                // this means a stalled snake
+            } else if (collisionResult == -2) {
                 s.die()
             } else {
                 let tail = s.update(nh, collisionResult);
@@ -234,6 +242,9 @@ export class Game {
                     this.board[tail.x][tail.y] = 0;
                 }
             }
+
+            // console.log(this.board)
+            console.log(nh)
 
 
         });

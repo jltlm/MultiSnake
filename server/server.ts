@@ -3,12 +3,29 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import { Game } from "./GameObjects";
 
+// import express from "express";
+// const app = express();
+// import cors from "cors";
+// const corsOptions ={
+//    origin:'*', 
+//    credentials:true,            //access-control-allow-credentials:true
+//    optionSuccessStatus:200,
+// }
+
+// app.use(cors(corsOptions)) // Use this after the variable declaration
+
 const hostname = "127.0.0.1";
 const port = 8000;
+// const httpServer = createServer(app); // Create HTTP server
 const httpServer = createServer(function (req, res) {
-  res.writeHead(200, {
-    'Access-Control-Allow-Origin': '*'
-  });
+  // res.setHeader("Access-Control-Allow-Origin", "https://jltlm.github.io");
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  // res.writeHead(200, {
+  //   'Access-Control-Allow-Origin': 'https://jltlm.github.io'
+  // });
+
 }); // Create HTTP server
 
 // Prints a log once the server starts listening
@@ -18,12 +35,13 @@ httpServer.listen(port, hostname, function () {
 
 const io = new Server(httpServer, {
   cors: {
-    // origin: "http://127.0.0.1:5173"
-    origin: "https://7d2b12uladuc.share.zrok.io",
+    origin: "http://127.0.0.1:5173",
+    // origin: "https://jltlm.github.io",
     methods: ["GET", "POST"]
   }
   // options
 });
+
 
 let rooms = {
   'multi' : 'multiplayer',
@@ -41,9 +59,10 @@ io.on("connection", (socket) => {
   let snake;
   
   socket.on("getSnake", (name) => {
-    snake = game.getSnake(name)
+    snake = game.getSnake(name);
     console.log(snake.getPosition());
     playerName = name;
+    socket.emit("snakeID", snake.getID());
   })
 
 

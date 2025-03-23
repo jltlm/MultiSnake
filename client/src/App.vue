@@ -32,8 +32,8 @@ addEventListener("keydown", (e) => {
   <br/>
   <button @click="socketFunctionality.start()">Start</button>
   <button @click="socketFunctionality.end()">End</button>
-  {{ socketState.connected }}
-  <!-- <GameInfo/> -->
+  Connected to server: {{ socketState.connected }}
+  <GameInfo/>
   <Board/>
   
 </template>

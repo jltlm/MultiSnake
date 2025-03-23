@@ -6,14 +6,14 @@ export const socketState = reactive({
     connected : false,
 })
 
-//   const socket = io("http://127.0.0.1:8000/", {
-//     autoConnect: false
-// });
-
-const socket = io("https://hgwaan3k1t2v.share.zrok.io", {
-  autoConnect: false,
-  // transports: ['websockets']
+  const socket = io("http://127.0.0.1:8000/", {
+    autoConnect: false
 });
+
+// const socket = io("https://ecyyoclhbv66.share.zrok.io/", {
+//   autoConnect: false,
+//   // transports: ['websockets']
+// });
 
 export const socketFunctionality = {
   connect: () => {
@@ -45,6 +45,10 @@ socket.on("connect", () => {
 
 socket.on("disconnect", () => {
   socketState.connected = false;
+});
+
+socket.on("snakeID", (id) => {
+  gameState.mySnakeID = id;
 });
 
 socket.on("game", (info, gameobjects) => {
