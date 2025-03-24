@@ -2,9 +2,9 @@ import { reactive } from "vue";
 
 enum boardItems {
     empty = 0,
-    team1 = 1,
-    team2 = 2,
-    apple = 3
+    apple = 1,
+    team1 = 2,
+    team2 = 3,
 }
 
 export const gameState = reactive({

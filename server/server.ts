@@ -70,11 +70,9 @@ io.on("connection", (socket) => {
   socket.on("start", (s) => {
     console.log("game started ===========")
     gameStart();
-    
   })
 
   socket.on("direction", (dir) => {
-    console.log("game started ===========")
     snake.setDirection(dir);
   })
 
