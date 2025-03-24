@@ -16,9 +16,9 @@ export const socketState = reactive({
 // });
 
 export const socketFunctionality = {
-  connect: () => {
+  connect: (a: Boolean) => {
     socket.connect();
-    if(sessionStorage.getItem("imAdmin")) return;
+    if(a) return;
     if (!sessionStorage.getItem("playerName")) {
       sessionStorage.setItem("playerName", (Math.random()*200).toString());
     }

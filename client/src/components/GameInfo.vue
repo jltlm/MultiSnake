@@ -18,7 +18,7 @@ div {
     top: 50px;
     right: 50px;
     width: 300px;
-    height: 200px;
+    height: 120px;
     background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(5px);
     border-radius: 10px;

@@ -2,7 +2,7 @@
 import { gameState } from '../game';
 
 function determineSpaceType(cell:number) {
-    if (cell == gameState.mySnakeID) return 'snake-space';
+    if (cell == gameState.mySnakeID &&  gameState.mySnakeID != 0) return 'snake-space';
     if (cell == 0) return 'empty-space';
     if (cell == 1) return 'apple-space';
     // if (cell%2 == 0) return 'team1-space'; // 2 and evens above

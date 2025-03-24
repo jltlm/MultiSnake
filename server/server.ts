@@ -73,7 +73,7 @@ io.on("connection", (socket) => {
   })
 
   socket.on("direction", (dir) => {
-    snake.setDirection(dir);
+    if (snake) snake.setDirection(dir);
   })
 
   socket.on("end", (s) => {
@@ -81,7 +81,7 @@ io.on("connection", (socket) => {
     game.printSnakeInfo();
     gameEnd();
     game = new Game();
-    snake = game.getSnake(playerName)
+    if (snake) snake = game.getSnake(playerName)
   })
 
 
