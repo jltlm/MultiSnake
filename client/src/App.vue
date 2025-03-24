@@ -26,15 +26,14 @@ addEventListener("keydown", (e) => {
 });
 
 let secret = "";
-
 </script>
 
 <template>
-  <input v-model="secret">
-  <!-- <div v-if="secret == 'letmein'"> -->
+  <input v-model="secret"> {{ secret }}
+  <div v-if="secret == 'letmein'">
     <button @click="socketFunctionality.start()">Start</button>
     <button @click="socketFunctionality.end()">End</button>
-  <!-- </div> -->
+  </div>
   <button @click="socketFunctionality.connect()">Connect</button>
   <button @click="socketFunctionality.disconnect()">Disconnect</button>
   Connected to server: {{ socketState.connected }}
