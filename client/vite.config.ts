@@ -9,9 +9,15 @@ export default defineConfig({
     host: "127.0.0.1",
     port: 5173,
     allowedHosts: [
-      "7d2b12uladuc.share.zrok.io",
-      'hgwaan3k1t2v.share.zrok.io'
+      "https://ec2-34-238-49-255.compute-1.amazonaws.com/",
+      "l32yyy3u94ug.share.zrok.io"
     ],
     cors: true,
+    // proxy: {
+    //   '/socket.io': {
+    //     target: 'https://zy5cffzl17uv.share.zrok.io',
+    //     ws: true
+    //   }
+    // }
   },
 })

@@ -3,29 +3,22 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import { Game } from "./GameObjects";
 
-// import express from "express";
-// const app = express();
-// import cors from "cors";
-// const corsOptions ={
-//    origin:'*', 
-//    credentials:true,            //access-control-allow-credentials:true
-//    optionSuccessStatus:200,
-// }
-
-// app.use(cors(corsOptions)) // Use this after the variable declaration
-
 const hostname = "127.0.0.1";
 const port = 8000;
-// const httpServer = createServer(app); // Create HTTP server
+
 const httpServer = createServer(function (req, res) {
-  // res.setHeader("Access-Control-Allow-Origin", "https://jltlm.github.io");
+  console.log("reaching server", req.headers)
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-  // res.writeHead(200, {
-  //   'Access-Control-Allow-Origin': 'https://jltlm.github.io'
-  // });
-
+  res.setHeader('Access-Control-Max-Age', 2592000); // 30 days
+  if (req.method === 'OPTIONS') {
+    res.writeHead(204); // No content
+    res.end();
+    return;
+}
+res.writeHead(200, { 'Content-Type': 'application/json' });
+res.end(JSON.stringify({ message: 'CORS enabled' }));
 }); // Create HTTP server
 
 // Prints a log once the server starts listening
@@ -35,8 +28,8 @@ httpServer.listen(port, hostname, function () {
 
 const io = new Server(httpServer, {
   cors: {
-    origin: "http://127.0.0.1:5173",
-    // origin: "https://jltlm.github.io",
+    // origin: "https://share.zrok.io",
+    origin: "*",
     methods: ["GET", "POST"]
   }
   // options
