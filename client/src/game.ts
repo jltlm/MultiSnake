@@ -8,7 +8,8 @@ enum boardItems {
 }
 
 export const gameState = reactive({
-    info : [],
+    myHighScore: 0,
+    myScore: 0,
     boardSize: 20,
     board: new Array<Array<number>>,
     snakes: [],
@@ -32,7 +33,19 @@ export const gameState = reactive({
         }
         for (let i = 0; i < ss.length; i++) {
             gameState.board[ss[i]["head"]["x"]][ss[i]["head"]["y"]] = ss[i]["id"];
-            gameState.board[ss[i]["trail"]["x"]][ss[i]["trail"]["y"]] = 0;
+            gameState.board[ss[i]["trail"]["x"]][ss[i]["trail"]["y"]] = boardItems.empty;
+
+            if (ss[i]["id"] == gameState.mySnakeID) {
+                gameState.myScore = ss[i]["score"];
+                if (gameState.myScore > gameState.myHighScore) {
+                    gameState.myHighScore = gameState.myScore;
+                }
+            }
+        }
+    },
+    clear: (c: any) => {
+        for (let i = 0; i < c.length; i++) {
+            gameState.board[c[i]["x"]][c[i]["y"]] = boardItems.empty;
         }
     }
   };

@@ -91,7 +91,7 @@ io.on("connection", (socket) => {
 let gameActiveInterval: NodeJS.Timeout;
 function gameStart() {
   gameActiveInterval = setInterval(function() {
-    io.to(rooms['multi']).emit('game', 'gameinfo', game.getBoardItems());
+    io.to(rooms['multi']).emit('game', game.getBoardItems());
     game.updateBoard();
     console.log("updating game");
   }, 500);

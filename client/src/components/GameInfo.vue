@@ -1,17 +1,14 @@
 <script setup lang="ts">
-
-// defineProps<{ scores: number[] }>()
-let scores = [4, 5, 6, 7];
-
+import { gameState } from '../game';
 
 </script>
 
 <template>
     <div>
-    <h3>Your Team Score: {{ scores[0] }}</h3>
-    <h3>Other Team Score: {{ scores[1] }}</h3>
-    <h3>Your Current Score: {{ scores[2] }}</h3>
-    <p>Your high score: {{ scores[3] }}</p>
+    <!-- <h3>Your Team Score: {{ scores[0] }}</h3>
+    <h3>Other Team Score: {{ scores[1] }}</h3> -->
+    <h3>Current Score: {{ gameState.myScore }}</h3>
+    <h3>High Score: {{ gameState.myHighScore }}</h3>
     </div>
 </template>
 

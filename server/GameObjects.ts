@@ -75,8 +75,14 @@ class Snake {
         return out;
     }
 
-    public die() {
-
+    public die(respawnPoint: Coord) {
+        this.score = 0;
+        this.head = respawnPoint;
+        this.position = new Array();
+        for (let i = this.starterLen-1; i >= 0; i--) {
+            this.position.push({x: this.head.x, y: this.head.y});
+        }
+        this.trail = this.head;
     }
 
     public printPosition() {
@@ -89,7 +95,8 @@ class Snake {
         let sdict = {
             id: this.id,
             head: this.head,
-            trail: this.trail
+            trail: this.trail,
+            score: this.score
         };
         return sdict;
     }
@@ -105,6 +112,7 @@ export class Game {
     private apples: Array<Coord>;
     private redTeam: Team;
     private blueTeam: Team;
+    private clearCoords: Array<Coord>; // for fast things, will be added and taken from often
 
     public constructor() {
         this.board = new Array(this.boardSize);
@@ -121,15 +129,17 @@ export class Game {
 
         this.redTeam = new Team("red", TeamID.red);
         this.blueTeam = new Team("blue", TeamID.blue);
+        this.clearCoords = new Array();
     }
 
     public getBoardItems() { // for serializing stuff to send
-        let sarr = Array();
+        let sarr = new Array();
         for (let i = 0; i < this.snakes.length; i++) {
             let entry = this.snakes[i].serializeSnake();
             sarr.push(entry);
         }
         return {
+            clearCoords: this.clearCoords,
             snakes: sarr,
             apples: this.apples
         }
@@ -200,41 +210,32 @@ export class Game {
     // or if head will hit a wall (out of bounds)
     // returns score increase or -1 if bad collision (snake death)
     private handleCollisions(s:Snake, nh: Coord): number {
-        // check oob
-        if (nh.x < 0 || nh.x >= this.boardSize || nh.y < 0 || nh.y >= this.boardSize) {
-            return -1;
-        }
+        if (this.isOob(nh)) return -1;
 
         let spot = this.board[nh.x][nh.y];
-        // checking which square the head lands on
-        switch (this.board[nh.x][nh.y]) {
-            case boardItems.empty:
-                return 0;
-            case boardItems.apple: // apple ate, apple respawn!
-                this.eatApple(nh);
-                return 1;
-            case s.getTeam(): // same team collision
-                return 0;
-            // case s.getTeam(): // other team collision
-            //     // get snake colliding with using spot
-                
-            //     // and u wanna tell the other snake to score up
-            //     return -1
+        if (spot == boardItems.empty) return 0;
+        else if (spot == boardItems.apple) {
+            this.eatApple(nh); return 1;
         }
-
-        return 0;
+        return -1;
     }
 
     public updateBoard() {
-        
+        this.clearCoords = new Array();
+
         this.snakes.forEach(s => {
             let nh = s.newHead();
             let collisionResult = this.handleCollisions(s, nh);
 
             if (collisionResult == -1) {
                 // this means a stalled snake
-            } else if (collisionResult == -2) {
-                s.die()
+                // NO MORE!!! THIS MEANS DEATH!!!
+                for (let i = 0; i < s.getPosition().length; i++) {
+                    let pos = s.getPosition()[i];
+                    this.clearCoords.push(pos);
+                    this.board[pos.x][pos.y] = boardItems.empty;
+                }
+                s.die(this.getRandUnoccupiedSpace());
             } else {
                 let tail = s.update(nh, collisionResult);
                 this.board[nh.x][nh.y] = s.getID();
@@ -242,10 +243,6 @@ export class Game {
                     this.board[tail.x][tail.y] = 0;
                 }
             }
-
-            // console.log(this.board)
-            console.log(nh)
-
 
         });
     }

@@ -18,6 +18,7 @@ export const socketState = reactive({
 export const socketFunctionality = {
   connect: () => {
     socket.connect();
+    if(sessionStorage.getItem("imAdmin")) return;
     if (!sessionStorage.getItem("playerName")) {
       sessionStorage.setItem("playerName", (Math.random()*200).toString());
     }
@@ -51,12 +52,11 @@ socket.on("snakeID", (id) => {
   gameState.mySnakeID = id;
 });
 
-socket.on("game", (info, gameobjects) => {
-  gameState.info = info;
+socket.on("game", (gameobjects) => {
+  gameFunctionality.clear(gameobjects.clearCoords);
   gameState.snakes = gameobjects.snakes;
   gameState.apples = gameobjects.apples;
   console.log("apples", gameState.apples, gameobjects.apples);
-
 
   console.log('getting game info')
   gameFunctionality.updateWithGameObjects()
