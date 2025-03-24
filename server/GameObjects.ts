@@ -32,6 +32,8 @@ class Snake {
     private starterLen = 5;
     private id = 1;
     private team = 2;
+    private numDeaths = 0;
+    private highScore = 0;
 
     public constructor(head: Coord, direction: Dir, team: TeamID) {
         this.score = 0;
@@ -81,6 +83,7 @@ class Snake {
     }
 
     public die(respawnPoint: Coord) {
+        if (this.score > this.highScore) this.highScore = this.score;
         this.score = 0;
         this.head = respawnPoint;
         this.position = new Array();
@@ -88,6 +91,7 @@ class Snake {
             this.position.push({x: this.head.x, y: this.head.y});
         }
         this.trail = this.head;
+        this.numDeaths++;
     }
 
     public printPosition() {
@@ -104,6 +108,13 @@ class Snake {
             score: this.score
         };
         return sdict;
+    }
+
+    public printSnakeInfo() {
+        console.log("-------------------");
+        console.log("THIS IS SNAKE", this.id);
+        console.log("high score", this.highScore);
+        console.log("num deaths", this.numDeaths);
     }
     
 }
@@ -136,6 +147,12 @@ export class Game {
         this.redTeam = new Team("red", boardItems.team1);
         this.blueTeam = new Team("blue", boardItems.team2);
         this.clearCoords = new Array();
+    }
+
+    public printSnakeInfo() {
+        for (let i = 0; i < this.snakes.length; i++) {
+            this.snakes[i].printSnakeInfo();
+        }
     }
 
     public getBoardItems() { // for serializing stuff to send

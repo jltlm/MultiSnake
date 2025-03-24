@@ -80,6 +80,7 @@ io.on("connection", (socket) => {
 
   socket.on("end", (s) => {
     console.log("game ended ===========")
+    game.printSnakeInfo();
     gameEnd();
     game = new Game();
     snake = game.getSnake(playerName)
