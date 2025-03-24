@@ -14,16 +14,13 @@ function determineSpaceType(cell:number) {
 </script>
 
 <template>
-    <div>
-        {{ gameState.snakes }}
-    </div>
     <div class="grid-container">
     <div v-for="(cell, index) in gameState.board.flat()" 
         :key="index" 
         :class="['space', determineSpaceType(cell)]">
     </div>
     </div>
-    <h1>Direction: {{ gameState.direction }}</h1>
+    <h2>Direction: {{ gameState.direction }}</h2>
 </template>
 
 <style scoped>
@@ -33,8 +30,8 @@ function determineSpaceType(cell:number) {
     grid-template-rows: repeat(20, 1fr);
     gap: 0px;
     border: white solid 5px;
-    width: 420px;
-    height: 420px;
+    width: 600px;
+    height: 600px;
 }
 
 div.space {
@@ -44,8 +41,8 @@ div.space {
     align-items: center;
     justify-content: center;
     border: 1px solid #ff0000;
-    height: 18px;
-    width: 18px;
+    height: 25px;
+    width: 25px;
 }
 div.apple-space {
     background-color: #ff0000;

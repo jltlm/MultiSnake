@@ -53,7 +53,12 @@ class Snake {
     public getPosition() { return this.position; }
     public getHead() : Coord { return this.head; }
     public getDirection():Dir { return this.direction; }
-    public setDirection(d: Dir) { this.direction = d; }
+    public setDirection(d: Dir) {
+        if (!(this.direction == Dir.up && d == Dir.down ||
+            this.direction == Dir.down && d == Dir.up ||
+            this.direction == Dir.left && d == Dir.right ||
+            this.direction == Dir.right && d == Dir.left)) this.direction = d;
+    }
 
     public newHead(): Coord {
         let newHead = {
@@ -127,8 +132,9 @@ export class Game {
             this.spawnApple();
         }
 
-        this.redTeam = new Team("red", TeamID.red);
-        this.blueTeam = new Team("blue", TeamID.blue);
+        // this.redTeam = new Team("red", TeamID.red);
+        this.redTeam = new Team("red", boardItems.team1);
+        this.blueTeam = new Team("blue", boardItems.team2);
         this.clearCoords = new Array();
     }
 

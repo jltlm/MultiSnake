@@ -42,7 +42,7 @@ let secret = "";
   <Board/>
 
   <a href="https://docs.google.com/forms/d/e/1FAIpQLScNz36d4pBkoHKZfBzO_tcqUkNda3NPTdOiVrAaSVIhbO7MXQ/viewform?usp=header">
-    -- google form (rit email only) --
+    -- google form (rit email only). YOUR SNAKE ID IS {{ gameState.mySnakeID }} --
   </a>
   
 </template>
